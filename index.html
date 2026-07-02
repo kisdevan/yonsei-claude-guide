@@ -688,6 +688,17 @@
       white-space: nowrap;
     }
 
+    .note code,
+    .section-body p code {
+      font-family: Consolas, "SFMono-Regular", Menlo, monospace;
+      font-size: 0.92em;
+      background: #f1f5f9;
+      padding: 1px 6px;
+      border-radius: 5px;
+      color: var(--coral-deep);
+      word-break: break-all;
+    }
+
     .toc-group + .toc-group { margin-top: 12px; }
 
     .toc-group-title {
@@ -745,9 +756,18 @@ claude doctor`,
       omcPlan: `폴더 안의 기획안을 바탕으로 4주(주차별) 프로젝트 실행 계획을 세워줘.
 주차별 목표·핵심 작업·산출물을 표로 정리하고,
 전체 흐름을 Mermaid 다이어그램(간트 또는 플로우차트) 아티팩트로 만들어줘.`,
-      omcMarketplace: `/plugin marketplace add https://github.com/Yeachan-Heo/oh-my-claudecode`,
-      omcInstall: `/plugin install oh-my-claudecode`,
-      omcSetup: `/setup`,
+      omcInstallPrompt: `아래 GitHub 저장소를 Claude Code 플러그인 마켓플레이스로 추가하고 oh-my-claudecode 플러그인을 설치해줘.
+저장소: https://github.com/Yeachan-Heo/oh-my-claudecode
+필요하면 .claude/settings.json 의 extraKnownMarketplaces·enabledPlugins를 직접 수정해도 돼.
+설치가 끝나면 앱을 재시작해야 하는지 알려주고, 쓸 수 있는 OMC 슬래시 명령을 목록으로 보여줘.`,
+      omcSettings: `{
+  "extraKnownMarketplaces": {
+    "oh-my-claudecode": {
+      "source": { "source": "github", "repo": "Yeachan-Heo/oh-my-claudecode" }
+    }
+  },
+  "enabledPlugins": { "oh-my-claudecode@oh-my-claudecode": true }
+}`,
       omcNpm: `npm i -g oh-my-claude-sisyphus@latest`
     };
 
@@ -786,8 +806,8 @@ claude doctor`,
       "데스크톱 앱 Code 탭 열기 완료",
       "Code 탭에서 수업용 폴더 연결 완료",
       "Code 탭에서 첫 세션 실행 성공",
+      "OMC 설치 프롬프트 실행 완료",
       "OMC 플러그인 설치 완료",
-      "/setup 실행 완료",
       "프롬프트에 / 입력 시 OMC 스킬 표시 확인",
       "개인정보 파일은 수업용 폴더에 넣지 않기"
     ];
@@ -1094,18 +1114,20 @@ claude doctor`,
               ),
               h(Section, { id: "omc", label: "11 · OMC", title: "Oh My Claude Code — 설치와 소개" },
                 h("p", null, "OMC(Oh My Claude Code)는 Claude Code 위에서 도는 확장입니다. 한 명의 AI에게 모든 일을 시키는 대신, 역할을 나눠서 검토·작성·정리·비판을 병렬로 진행할 수 있게 해줍니다."),
-                h("h3", null, "OMC 설치 — 터미널 없이 Code 탭에서"),
+                h("h3", null, "OMC 설치 — 프롬프트로 요청하기"),
+                h("div", { className: "note" }, h("strong", null, "왜 프롬프트로?"), " 데스크톱 Code 탭에서는 ", h("code", null, "/plugin"), " 슬래시 명령이 막혀 있어(\"isn't available in this environment\") 직접 쓸 수 없습니다. 대신 저장소 주소를 넣어 Claude에게 설치를 맡기면 됩니다."),
                 h("div", { className: "step-list" },
-                  ["데스크톱 앱 Code 탭에서 수업용 폴더로 세션을 연다.",
-                   "프롬프트 입력창에 아래 명령을 순서대로 입력한다.",
-                   "1) 마켓플레이스 추가 → 2) 플러그인 설치 → 3) /setup 초기 설정.",
-                   "입력창에 / 를 쳐서 OMC 스킬 목록이 뜨면 설치 성공이다."].map((text) => h("div", { className: "step", key: text }, h("p", null, text)))
+                  ["데스크톱 앱 Code 탭에서 프로젝트 폴더로 세션을 연다.",
+                   "아래 프롬프트를 입력창에 붙여넣고 실행한다.",
+                   "Claude가 마켓플레이스 추가와 플러그인 설치를 진행한다. 승인(Accept) 요청이 뜨면 허용한다.",
+                   "안내에 따라 필요하면 앱을 재시작한 뒤, 입력창에 / 를 쳐 OMC 스킬이 보이면 설치 성공이다."].map((text) => h("div", { className: "step", key: text }, h("p", null, text)))
                 ),
-                h(CodeBlock, { label: "1) 마켓플레이스 추가", value: codeBlocks.omcMarketplace }),
-                h(CodeBlock, { label: "2) 플러그인 설치", value: codeBlocks.omcInstall }),
-                h(CodeBlock, { label: "3) 초기 설정", value: codeBlocks.omcSetup }),
-                h("div", { className: "note" }, "확인: 입력창에 ", h("strong", null, "/"), " 를 입력하면 슬래시 명령·스킬 목록이 뜹니다. 여기에 OMC 스킬(예: /oh-my-claudecode:…)이 보이면 설치가 끝난 것입니다. GUI로도 가능해요 — 입력창 옆 ", h("strong", null, "+ 버튼 → Plugins → Add plugin"), "에서 마켓플레이스를 추가·관리할 수 있습니다."),
-                h("div", { className: "note" }, "터미널 CLI(선택·고급 경로)를 쓰는 경우에는 npm으로도 설치할 수 있습니다."),
+                h(CodeBlock, { label: "OMC 설치 요청 프롬프트", value: codeBlocks.omcInstallPrompt }),
+                h("div", { className: "note" }, "확인: 입력창에 ", h("strong", null, "/"), " 를 입력하면 슬래시 명령·스킬 목록이 뜹니다. 여기에 OMC 스킬(예: /oh-my-claudecode:…)이 보이면 설치가 끝난 것입니다. 설치된 플러그인은 입력창 옆 ", h("strong", null, "+ 버튼 → Plugins → Manage plugins"), "에서 켜고 끌 수 있습니다."),
+                h("h3", null, "선택 · 고급 — 직접 설정하기"),
+                h("p", null, "프롬프트가 잘 안 되면 ", h("code", null, ".claude/settings.json"), " 에 마켓플레이스를 직접 추가한 뒤 앱을 재시작해도 됩니다. (마켓플레이스 이름은 자유롭게 정하고, enabledPlugins 키와 이름을 맞추세요.)"),
+                h(CodeBlock, { label: ".claude/settings.json", value: codeBlocks.omcSettings }),
+                h("p", null, "터미널 CLI(선택·고급 경로)를 쓴다면 npm으로도 설치할 수 있습니다."),
                 h(CodeBlock, { label: "npm 설치 대체 (터미널 CLI 사용자용)", value: codeBlocks.omcNpm }),
                 h("h3", null, "수업 트랙별 OMC 활용"),
                 h(Table, {
@@ -1142,6 +1164,7 @@ claude doctor`,
                   h(MiniCard, { title: "업그레이드하라는 안내가 뜸", body: "Claude Code는 유료(Pro/Max/Team/Enterprise) 플랜이 필요합니다. 교육용 계정 권한을 확인하세요." }),
                   h(MiniCard, { title: "403 · 로그인 오류", body: "온라인 로그인을 마치고 앱을 재시작하세요. 브라우저 팝업 차단도 확인합니다." }),
                   h(MiniCard, { title: "파일 수정이 걱정됨", body: "빈 수업용 폴더에서만 실습하고, 기본 Ask 모드에서 변경 계획·Accept를 확인하며 진행하세요." }),
+                  h(MiniCard, { title: "/plugin '이 환경에서 사용 불가'", body: "데스크톱 Code 탭에서는 /plugin 슬래시 명령을 쓸 수 없습니다. OMC는 저장소 주소를 넣은 프롬프트로 설치를 요청하세요(11번 참고)." }),
                   h(MiniCard, { title: "(고급) claude 명령을 찾을 수 없음", body: "터미널 CLI를 따로 설치한 경우입니다. 터미널을 완전히 닫았다가 새로 열어 다시 시도하세요." }),
                   h(MiniCard, { title: "(고급) PowerShell에서 && 오류", body: "CMD용 명령을 PowerShell에서 실행한 경우입니다. PowerShell용 설치 명령을 사용하세요." })
                 ),
